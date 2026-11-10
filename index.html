@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neutrogena — Zimska Aktivacija 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bd: #003087; --bm: #0071CE; --bl: #D5E8F7; --bp: #EEF5FB;
+    --white: #fff; --gbg: #F4F7FB; --gt: #444; --green: #2E7D32; --red: #C62828;
+    --r: 12px; --sh: 0 2px 12px rgba(0,48,135,.12);
+  }
+  html,body { height:100%; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--gbg); color:var(--gt); overflow-x:hidden; }
+
+  /* ── Header ── */
+  #app-header { background:var(--bd); color:var(--white); padding:12px 20px 8px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+  .brand-name { font-size:21px; font-weight:900; letter-spacing:1px; }
+  .brand-claim { font-size:8px; opacity:.6; letter-spacing:1.5px; margin-top:1px; }
+  #header-info { text-align:right; font-size:11px; opacity:.85; }
+  #header-counter { font-size:19px; font-weight:800; color:var(--bl); }
+
+  #progress-wrap { height:4px; background:rgba(255,255,255,.2); position:sticky; top:62px; z-index:99; }
+  #progress-bar { height:100%; background:var(--bl); transition:width .3s ease; width:0%; }
+
+  /* ── Screens ── */
+  .screen { display:none; min-height:calc(100vh - 66px); padding:0 0 80px; }
+  .screen.active { display:block; }
+  #screen-home, #screen-thanks, #screen-setup { display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:24px 24px; min-height:calc(100vh - 70px); }
+  #screen-home.active, #screen-thanks.active, #screen-setup.active { display:flex; }
+  #screen-home { overflow-y:auto; }
+
+  /* ── Setup screen ── */
+  .setup-card { width:100%; max-width:480px; background:var(--white);
+    border-radius:var(--r); box-shadow:var(--sh); padding:24px 20px; }
+  .setup-title { font-size:18px; font-weight:900; color:var(--bd); margin-bottom:6px; }
+  .setup-desc { font-size:13px; color:#666; line-height:1.6; margin-bottom:18px; }
+  .setup-label { font-size:12px; font-weight:700; color:var(--bd); margin-bottom:5px; display:block; }
+  .setup-input { width:100%; border:2px solid #DDE4EF; border-radius:10px;
+    padding:12px 14px; font-size:14px; color:var(--gt); outline:none;
+    font-family:inherit; transition:border-color .15s; margin-bottom:14px; }
+  .setup-input:focus { border-color:var(--bm); }
+  .setup-step { display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; }
+  .step-num { background:var(--bm); color:var(--white); width:24px; height:24px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800; flex-shrink:0; margin-top:1px; }
+  .step-text { font-size:12px; color:var(--gt); line-height:1.5; }
+  .step-text a { color:var(--bm); font-weight:600; }
+  .step-code { background:#F0F4FF; border:1px solid #C0D0EE; border-radius:6px;
+    padding:4px 8px; font-family:monospace; font-size:11px; color:var(--bd);
+    display:block; margin-top:4px; word-break:break-all; }
+  .btn-setup { width:100%; padding:13px; border-radius:50px; background:var(--bd);
+    color:var(--white); font-size:15px; font-weight:700; border:none; cursor:pointer;
+    margin-top:6px; }
+  .btn-setup:disabled { opacity:.4; }
+  .status-dot { display:inline-block; width:8px; height:8px; border-radius:50%;
+    margin-right:5px; vertical-align:middle; }
+  .dot-ok { background:#2E7D32; }
+  .dot-err { background:#C62828; }
+  .dot-pending { background:#FFA000; }
+  #conn-status { font-size:12px; margin-top:10px; min-height:20px; }
+
+  /* ── Home ── */
+  .home-logo { font-size:30px; font-weight:900; color:var(--bd); letter-spacing:2px; margin-bottom:3px; }
+  .home-claim { font-size:10px; color:var(--bm); letter-spacing:2px; font-weight:600; margin-bottom:28px; }
+  .survey-card { width:100%; max-width:440px; background:var(--white); border-radius:var(--r);
+    box-shadow:var(--sh); padding:24px 20px; margin-bottom:14px; cursor:pointer;
+    border:2px solid transparent; transition:border-color .2s, transform .15s; }
+  .survey-card:hover, .survey-card:active { border-color:var(--bm); transform:scale(1.01); }
+  .card-icon { font-size:36px; margin-bottom:8px; }
+  .card-title { font-size:19px; font-weight:800; color:var(--bd); margin-bottom:5px; }
+  .card-desc { font-size:12px; color:var(--gt); line-height:1.5; }
+  .card-count { margin-top:10px; font-size:12px; font-weight:700; color:var(--bm); }
+  .btn-dash { margin-top:8px; background:none; border:2px solid var(--bd);
+    color:var(--bd); font-size:14px; font-weight:700; padding:11px 28px;
+    border-radius:50px; cursor:pointer; transition:background .2s,color .2s; }
+  .btn-dash:hover { background:var(--bd); color:var(--white); }
+  .conn-badge { font-size:11px; padding:4px 10px; border-radius:50px;
+    font-weight:600; margin-bottom:16px; }
+  .badge-ok { background:#E8F5E9; color:#2E7D32; }
+  .badge-err { background:#FFEBEE; color:#C62828; }
+
+  /* ── Survey ── */
+  #screen-survey.active { display:block; }
+  .survey-header { background:var(--bm); color:var(--white); padding:12px 16px;
+    font-size:14px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  .back-btn { background:rgba(255,255,255,.2); border:none; color:var(--white);
+    font-size:18px; cursor:pointer; width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+  .question-wrap { padding:16px 16px 0; }
+  .q-num { font-size:11px; font-weight:700; color:var(--bm);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+  .q-text { font-size:17px; font-weight:800; color:var(--bd); line-height:1.3; margin-bottom:4px; }
+  .q-note { font-size:11px; color:#888; font-style:italic; margin-bottom:12px; }
+
+  /* Matrix */
+  .matrix-wrap { overflow-x:auto; margin-bottom:16px; }
+  .matrix-table { width:100%; border-collapse:collapse; min-width:380px; }
+  .matrix-table thead th { background:var(--bd); color:var(--white); font-size:11px;
+    font-weight:700; padding:8px 6px; text-align:center; line-height:1.3; }
+  .matrix-table thead th:first-child { text-align:left; padding-left:10px; min-width:130px; }
+  .matrix-table tbody tr { border-bottom:1px solid #E0E8F0; }
+  .matrix-table tbody tr:nth-child(odd) { background:var(--bp); }
+  .matrix-table tbody tr:nth-child(even) { background:var(--white); }
+  .matrix-table tbody td { padding:10px 6px; text-align:center; }
+  .matrix-table tbody td:first-child { text-align:left; padding-left:10px;
+    font-size:13px; color:var(--gt); }
+  .matrix-cell-btn { width:34px; height:34px; border-radius:8px; border:2px solid #C5D5E8;
+    background:var(--white); cursor:pointer; display:flex; align-items:center;
+    justify-content:center; margin:0 auto; font-size:16px; color:var(--bm);
+    transition:all .15s; }
+  .matrix-cell-btn.selected { background:var(--bm); border-color:var(--bm); color:var(--white); font-size:14px; }
+
+  /* Ranking */
+  .rank-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+  .rank-table thead th { background:var(--bd); color:var(--white); font-size:11px;
+    padding:8px 6px; text-align:center; line-height:1.3; }
+  .rank-table thead th:first-child { text-align:left; padding-left:10px; }
+  .rank-table tbody tr { border-bottom:1px solid #E0E8F0; }
+  .rank-table tbody tr:nth-child(odd) { background:var(--bp); }
+  .rank-table tbody tr:nth-child(even) { background:var(--white); }
+  .rank-table tbody td { padding:9px 6px; text-align:center; }
+  .rank-table tbody td:first-child { text-align:left; padding-left:10px; font-size:13px; color:var(--gt); }
+  .rank-btn { width:36px; height:36px; border-radius:50%; border:2px solid #C5D5E8;
+    background:var(--white); font-size:14px; font-weight:800; color:#888;
+    cursor:pointer; transition:all .15s; margin:0 auto; display:block; }
+  .rank-btn.selected { background:var(--bm); border-color:var(--bm); color:var(--white); }
+
+  /* Free text */
+  .free-input { width:100%; border:2px solid #DDE4EF; border-radius:10px;
+    padding:13px 14px; font-size:16px; color:var(--gt); resize:none;
+    outline:none; font-family:inherit; transition:border-color .15s; margin-bottom:16px; }
+  .free-input:focus { border-color:var(--bm); }
+
+  /* Brand picker */
+  .brand-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; }
+  .brand-btn { background:var(--white); border:2px solid #DDE4EF; border-radius:10px;
+    padding:14px 10px; cursor:pointer; text-align:center; transition:all .15s;
+    display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .brand-btn .b-check { width:26px; height:26px; border-radius:50%; border:2px solid #CCC;
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+    transition:all .15s; }
+  .brand-btn .b-name { font-size:15px; font-weight:800; color:var(--bd); }
+  .brand-btn.selected { border-color:var(--bm); background:var(--bp); }
+  .brand-btn.selected .b-check { background:var(--bm); border-color:var(--bm); color:var(--white); }
+
+  /* Nav */
+  .nav-wrap { position:fixed; bottom:0; left:0; right:0; background:var(--white);
+    padding:10px 16px; display:flex; gap:10px; align-items:center;
+    box-shadow:0 -2px 12px rgba(0,48,135,.1); z-index:90; }
+  .btn-nav { flex:1; padding:13px; border-radius:50px; font-size:15px; font-weight:700;
+    cursor:pointer; border:none; transition:opacity .15s; }
+  .btn-next { background:var(--bd); color:var(--white); }
+  .btn-prev { background:var(--white); color:var(--bd); border:2px solid var(--bd); flex:0 0 95px; }
+  .btn-nav:disabled { opacity:.4; cursor:default; }
+
+  /* Sending overlay */
+  #sending-overlay { display:none; position:fixed; inset:0; background:rgba(0,48,135,.7);
+    z-index:200; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+  #sending-overlay.show { display:flex; }
+  .spinner { width:48px; height:48px; border:4px solid rgba(255,255,255,.3);
+    border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .sending-text { color:#fff; font-size:16px; font-weight:700; }
+
+  /* Thanks */
+  #screen-thanks .thanks-icon { font-size:68px; margin-bottom:14px; }
+  #screen-thanks .thanks-title { font-size:25px; font-weight:900; color:var(--bd); margin-bottom:8px; }
+  #screen-thanks .thanks-sub { font-size:14px; color:#666; line-height:1.6; margin-bottom:28px; text-align:center; }
+  .btn-new { background:var(--bd); color:var(--white); border:none; padding:15px 36px;
+    border-radius:50px; font-size:16px; font-weight:700; cursor:pointer; box-shadow:var(--sh); }
+
+  /* Dashboard */
+  #screen-dash.active { display:block; }
+  #screen-dash { padding:16px; padding-bottom:40px; }
+  .dash-title { font-size:19px; font-weight:900; color:var(--bd); margin-bottom:14px; }
+  .stat-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+  .stat-card { background:var(--white); border-radius:var(--r); box-shadow:var(--sh);
+    padding:16px; text-align:center; }
+  .stat-num { font-size:34px; font-weight:900; color:var(--bd); }
+  .stat-label { font-size:10px; color:#888; margin-top:3px; }
+  .stat-card.accent { background:var(--bd); }
+  .stat-card.accent .stat-num { color:var(--bl); }
+  .stat-card.accent .stat-label { color:rgba(255,255,255,.65); }
+  .section-title { font-size:12px; font-weight:700; color:var(--bm);
+    text-transform:uppercase; letter-spacing:.5px; margin:20px 0 8px;
+    border-left:4px solid var(--bm); padding-left:8px; }
+  .q-dash-block { background:var(--white); border-radius:var(--r);
+    box-shadow:var(--sh); padding:14px; margin-bottom:12px; }
+  .q-dash-label { font-size:12px; font-weight:700; color:var(--bd); margin-bottom:8px; }
+  .bar-row { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+  .bar-label { font-size:11px; color:var(--gt); flex:0 0 150px; line-height:1.3; }
+  .bar-track { flex:1; background:#EEE; border-radius:20px; height:18px; overflow:hidden; }
+  .bar-fill { height:100%; background:var(--bm); border-radius:20px; min-width:2px; }
+  .bar-count { font-size:11px; font-weight:700; color:var(--bd); flex:0 0 36px; text-align:right; }
+  .free-list { list-style:none; }
+  .free-list li { font-size:12px; color:var(--gt); padding:4px 0;
+    border-bottom:1px solid #EEE; display:flex; gap:6px; }
+  .free-list li::before { content:"•"; color:var(--bm); font-weight:700; }
+  .dash-tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .dash-tab { flex:1; padding:9px; border-radius:50px; font-size:12px; font-weight:700;
+    cursor:pointer; border:2px solid var(--bd); background:var(--white); color:var(--bd); }
+  .dash-tab.active { background:var(--bd); color:var(--white); }
+  .export-btn { width:100%; margin-top:20px; padding:13px; border-radius:50px;
+    background:var(--green); color:var(--white); font-size:14px; font-weight:700;
+    border:none; cursor:pointer; }
+  .clear-btn { width:100%; margin-top:8px; padding:11px; border-radius:50px;
+    background:none; color:var(--red); font-size:12px; font-weight:600;
+    border:2px solid var(--red); cursor:pointer; }
+  .rank-sum-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .rank-sum-table th { background:var(--bd); color:var(--white); padding:6px 7px;
+    text-align:center; font-size:11px; }
+  .rank-sum-table th:first-child { text-align:left; }
+  .rank-sum-table td { padding:6px 7px; border-bottom:1px solid #EEE; }
+  .rank-sum-table tr:nth-child(odd) td { background:var(--gbg); }
+  .rank-sum-table td:not(:first-child) { text-align:center; }
+  .rank-score { font-weight:700; color:var(--bd); }
+  .matrix-dash { display:grid; gap:6px; }
+  .mrow { display:flex; align-items:center; gap:6px; font-size:11px; margin-bottom:4px; }
+  .mrow-label { flex:0 0 130px; color:var(--gt); line-height:1.3; }
+  .mrow-bars { flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+  .mrow-bar-wrap { text-align:center; }
+  .mrow-col-label { font-size:9px; color:#888; margin-bottom:2px; }
+  .mrow-track { background:#EEE; border-radius:10px; height:14px; overflow:hidden; }
+  .mrow-fill { height:100%; background:var(--bm); border-radius:10px; }
+  .mrow-cnt { font-size:10px; color:var(--bd); font-weight:700; margin-top:1px; }
+  .sync-info { font-size:11px; color:#888; text-align:center; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- SENDING OVERLAY -->
+<div id="sending-overlay">
+  <div class="spinner"></div>
+  <div class="sending-text">Slanje podataka...</div>
+</div>
+
+<!-- HEADER -->
+<header id="app-header">
+  <div>
+    <div class="brand-name">NEUTROGENA</div>
+    <div class="brand-claim">BEAUTY TO A SCIENCE</div>
+  </div>
+  <div id="header-info">
+    <div id="header-counter">0</div>
+    <div style="font-size:10px">ispunjenih anketa</div>
+  </div>
+</header>
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<!-- setup elements hidden, URL hardcoded -->
+<input type="hidden" id="script-url-input" value="https://script.google.com/macros/s/AKfycbx4dkWjTTIjND8t1etPk2eYBT1shU9rH0Gi34mp0EMGlkl9XlDdmwUdy2zbMGohPUFvyw/exec">
+<div id="conn-status" style="display:none"></div>
+
+<!-- PIN OVERLAY -->
+<div id="pin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:32px 28px;width:300px;text-align:center;
+    box-shadow:0 8px 32px rgba(0,48,135,.25);">
+    <div style="font-size:28px;margin-bottom:4px;">🔒</div>
+    <div style="font-size:17px;font-weight:900;color:#003087;margin-bottom:4px;">Zaštićeno područje</div>
+    <div style="font-size:12px;color:#888;margin-bottom:18px;">Unesite PIN za pristup rezultatima</div>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="6"
+      style="width:100%;border:2px solid #DDE4EF;border-radius:10px;padding:12px;
+      font-size:22px;text-align:center;letter-spacing:6px;outline:none;font-family:inherit;"
+      onkeydown="if(event.key==='Enter')checkPin()"
+      onfocus="this.style.borderColor='#0071CE'" onblur="this.style.borderColor='#DDE4EF'">
+    <div id="pin-error" style="color:#C62828;font-size:12px;min-height:18px;margin-top:6px;"></div>
+    <button onclick="checkPin()" style="width:100%;margin-top:12px;padding:13px;border-radius:50px;
+      background:#003087;color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;">
+      Potvrdi →
+    </button>
+    <button onclick="document.getElementById('pin-overlay').style.display='none'"
+      style="width:100%;margin-top:8px;padding:10px;border-radius:50px;background:none;
+      border:2px solid #DDE4EF;color:#888;font-size:13px;cursor:pointer;">
+      Odustani
+    </button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen">
+  <div class="home-logo">NEUTROGENA</div>
+  <div class="home-claim">BEAUTY TO A SCIENCE</div>
+  <div class="conn-badge badge-ok" id="home-badge">● Podaci se šalju u Google Sheets</div>
+
+  <div class="survey-card" onclick="startSurvey('hand')">
+    <div class="card-icon">🤲</div>
+    <div class="card-title">Njega ruku</div>
+    <div class="card-desc">5 pitanja o navikama i preferencijama pri njezi ruku</div>
+    <div class="card-count" id="count-hand">0 ispunjenih</div>
+  </div>
+
+  <div class="survey-card" onclick="startSurvey('body')">
+    <div class="card-icon">🧴</div>
+    <div class="card-title">Njega tijela</div>
+    <div class="card-desc">5 pitanja o navikama i preferencijama pri njezi tijela</div>
+    <div class="card-count" id="count-body">0 ispunjenih</div>
+  </div>
+
+  <button class="btn-dash" onclick="askPin()">📊 Rezultati i analiza</button>
+</div>
+
+<!-- SURVEY -->
+<div id="screen-survey" class="screen">
+  <div class="survey-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span id="survey-title-label">Upitnik</span>
+  </div>
+  <div class="question-wrap" id="question-area"></div>
+  <div class="nav-wrap">
+    <button class="btn-nav btn-prev" id="btn-prev" onclick="prevQ()">← Nazad</button>
+    <button class="btn-nav btn-next" id="btn-next" onclick="nextQ()">Dalje →</button>
+  </div>
+</div>
+
+<!-- THANKS -->
+<div id="screen-thanks" class="screen">
+  <div class="thanks-icon">🎉</div>
+  <div class="thanks-title">Hvala Vam!</div>
+  <div class="thanks-sub">Vaši odgovori su sačuvani i poslani.<br>Pomažete nam da budemo bolji za Vas.</div>
+  <button class="btn-new" onclick="goHome()">Nova anketa</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dash" class="screen">
+  <div class="dash-title">📊 Rezultati anketa</div>
+  <div class="stat-row">
+    <div class="stat-card accent"><div class="stat-num" id="dash-total">0</div><div class="stat-label">Ukupno</div></div>
+    <div class="stat-card"><div class="stat-num" id="dash-today">0</div><div class="stat-label">Danas</div></div>
+    <div class="stat-card"><div class="stat-num" id="dash-hand-n">0</div><div class="stat-label">Hand Care</div></div>
+    <div class="stat-card"><div class="stat-num" id="dash-body-n">0</div><div class="stat-label">Body Care</div></div>
+  </div>
+  <div class="sync-info" id="sync-info"></div>
+  <div class="dash-tabs">
+    <button class="dash-tab active" id="tab-hand" onclick="switchTab('hand')">🤲 Ruke</button>
+    <button class="dash-tab" id="tab-body" onclick="switchTab('body')">🧴 Tijelo</button>
+  </div>
+  <div id="dash-content"></div>
+  <button class="export-btn" onclick="exportCSV()">⬇ Preuzmi CSV (Excel)</button>
+  <button class="clear-btn" onclick="clearData()">🗑 Obriši lokalne podatke</button>
+  <br>
+  <button class="btn-dash" style="margin-top:14px;width:100%" onclick="goHome()">← Nazad</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  KONFIGURACIJA
+// ═══════════════════════════════════════════════════════
+const MATRIX_COLS = ['Svaki dan','Više puta\ndnevno','Nekoliko\nputa/sedm.','Rijetko'];
+const RANK_ATTRS  = ['Dugotrajna hidratacija','Brza apsorpcija (nije ljepljiva)','Miris','Dermatološki testirani sastojci'];
+const BRANDS      = ['Neutrogena','Mixa','Nivea','Balea'];
+
+const SURVEYS = {
+  hand: {
+    id:'hand', title:'Njega ruku — Upitnik',
+    questions:[
+      { id:'q01', type:'matrix',
+        text:'Kada i koliko često koristite kremu za ruke?',
+        note:'Možete označiti više odgovora',
+        rows:['Nakon pranja ruku','Ujutro — jutarnja rutina','Uveče — prije spavanja','Kad osjetim suhoću / napetost'],
+        cols: MATRIX_COLS },
+      { id:'q02', type:'rank',
+        text:'Šta Vam je najvažnije pri odabiru kreme za ruke?',
+        note:'Rangirajte od 1 (najvažnije) do 4 (najmanje važno)',
+        options: RANK_ATTRS },
+      { id:'q03', type:'free',
+        text:'Koji brend kreme za ruke trenutno koristite?',
+        note:'Upiši naziv brenda ili proizvoda',
+        placeholder:'npr. Neutrogena, Nivea, Dove...' },
+      { id:'q04', type:'free',
+        text:'Koji brend Vam prvi padne na pamet — njega ruku?',
+        note:'Top of mind — upiši prvi brend',
+        placeholder:'Upiši brend...' },
+      { id:'q05', type:'brands',
+        text:'Koji brend bi bio Vaš prvi izbor pri kupovini kreme za ruke?',
+        note:'Odaberite jedan ili više brendova koji su Vam prioritet',
+        options: BRANDS },
+    ]
+  },
+  body: {
+    id:'body', title:'Njega tijela — Upitnik',
+    questions:[
+      { id:'q01', type:'matrix',
+        text:'Kada i koliko često koristite losion ili kremu za tijelo?',
+        note:'Možete označiti više odgovora',
+        rows:['Nakon tuširanja / kupanja','Ujutro — jutarnja rutina','Uveče — prije spavanja','Kad osjetim suhoću kože'],
+        cols: MATRIX_COLS },
+      { id:'q02', type:'rank',
+        text:'Šta Vam je najvažnije pri odabiru losiona / kreme za tijelo?',
+        note:'Rangirajte od 1 (najvažnije) do 4 (najmanje važno)',
+        options: RANK_ATTRS },
+      { id:'q03', type:'free',
+        text:'Koji brend losiona / kreme za tijelo trenutno koristite?',
+        note:'Upiši naziv brenda ili proizvoda',
+        placeholder:'npr. Neutrogena, Nivea, Dove...' },
+      { id:'q04', type:'free',
+        text:'Koji brend Vam prvi padne na pamet — zimska njega tijela?',
+        note:'Top of mind — upiši prvi brend',
+        placeholder:'Upiši brend...' },
+      { id:'q05', type:'brands',
+        text:'Koji brend bi bio Vaš prvi izbor pri kupovini losiona / kreme za tijelo?',
+        note:'Odaberite jedan ili više brendova koji su Vam prioritet',
+        options: BRANDS },
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════════
+const KEY     = 'neutrogena_survey_2026';
+const URL_KEY = 'neutrogena_script_url';
+const load    = () => { try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];} };
+const save    = (d) => { try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){} };
+const getURL  = () => { try{return localStorage.getItem(URL_KEY)||'';}catch(e){return '';} };
+const saveURL = (u) => { try{localStorage.setItem(URL_KEY,u);}catch(e){} };
+
+// ── INIT: hardkodirani URL, direktno na home ──────────────
+const HARDCODED_URL = 'https://script.google.com/macros/s/AKfycbx4dkWjTTIjND8t1etPk2eYBT1shU9rH0Gi34mp0EMGlkl9XlDdmwUdy2zbMGohPUFvyw/exec';
+window.addEventListener('DOMContentLoaded', function() {
+  saveURL(HARDCODED_URL);
+  document.getElementById('script-url-input').value = HARDCODED_URL;
+  try { updateHome(); } catch(e) {}
+  showScreen('home');
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+let cSurvey=null, cIdx=0, cAns={};
+let dashTab='hand';
+
+window.onload = () => {
+  const url = getURL();
+  if(url) {
+    document.getElementById('script-url-input').value = url;
+    goHome();
+  }
+  updateHome();
+};
+
+// ═══════════════════════════════════════════════════════
+//  GOOGLE SHEETS CONNECTION
+// ═══════════════════════════════════════════════════════
+async function testConnection() {
+  const url = document.getElementById('script-url-input').value.trim();
+  if(!url || !url.startsWith('https://script.google.com')) {
+    setConnStatus('err','Unesite ispravan Apps Script URL');
+    return;
+  }
+  setConnStatus('pending','Testiranje veze...');
+  document.getElementById('btn-test-conn').disabled = true;
+  try {
+    const r = await fetch(url+'?action=ping', {method:'GET', mode:'no-cors'});
+    // no-cors uvijek uspije ako server postoji — to je dovoljno
+    saveURL(url);
+    setConnStatus('ok','✓ Veza uspješna! Aplikacija je spremna.');
+    document.getElementById('btn-test-conn').textContent = '▶ Otvori aplikaciju →';
+    document.getElementById('btn-test-conn').disabled = false;
+    document.getElementById('btn-test-conn').onclick = function() {
+      try { updateHome(); } catch(e) {}
+      showScreen('home');
+    };
+    setTimeout(function() {
+      try { updateHome(); } catch(e) {}
+      showScreen('home');
+    }, 1500);
+  } catch(e) {
+    setConnStatus('err','Greška: '+e.message);
+  }
+  document.getElementById('btn-test-conn').disabled = false;
+}
+
+function setConnStatus(type, msg) {
+  const el = document.getElementById('conn-status');
+  const dot = type==='ok'?'dot-ok':type==='err'?'dot-err':'dot-pending';
+  el.innerHTML = `<span class="status-dot ${dot}"></span>${msg}`;
+}
+
+async function sendToSheets(record) {
+  const url = getURL();
+  if(!url) return false;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(record)
+    });
+    return true;
+  } catch(e) {
+    console.warn('Sheets send failed:', e);
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function goHome() {
+  cSurvey=null; cIdx=0; cAns={};
+  updateHome(); showScreen('home');
+  document.getElementById('progress-bar').style.width='0%';
+}
+function askPin() {
+  const overlay = document.getElementById('pin-overlay');
+  overlay.style.display='flex';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-error').textContent='';
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
+}
+function checkPin() {
+  const val = document.getElementById('pin-input').value.trim();
+  if(val === '1921') {
+    document.getElementById('pin-overlay').style.display='none';
+    renderDash('hand'); showScreen('dash');
+  } else {
+    document.getElementById('pin-error').textContent = '✗ Pogrešan PIN';
+    document.getElementById('pin-input').value='';
+    document.getElementById('pin-input').focus();
+  }
+}
+function showDash() { renderDash('hand'); showScreen('dash'); }
+function startSurvey(t) {
+  cSurvey=t; cIdx=0; cAns={};
+  document.getElementById('survey-title-label').textContent=SURVEYS[t].title;
+  renderQ(); showScreen('survey');
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════════
+function renderQ() {
+  const sv=SURVEYS[cSurvey], q=sv.questions[cIdx], n=sv.questions.length;
+  document.getElementById('progress-bar').style.width=((cIdx/n)*100)+'%';
+  document.getElementById('btn-prev').disabled=cIdx===0;
+  document.getElementById('btn-next').textContent=cIdx===n-1?'Završi ✓':'Dalje →';
+
+  const a=document.getElementById('question-area');
+  a.innerHTML=`
+    <div class="q-num">Pitanje ${cIdx+1} / ${n}</div>
+    <div class="q-text">${q.text}</div>
+    ${q.note?`<div class="q-note">${q.note}</div>`:''}
+  `;
+
+  if(q.type==='matrix')       renderMatrix(q,a);
+  else if(q.type==='rank')    renderRank(q,a);
+  else if(q.type==='free')    renderFree(q,a);
+  else if(q.type==='brands')  renderBrands(q,a);
+}
+
+// Matrix
+function renderMatrix(q,a) {
+  const saved=cAns[q.id]||{};
+  const wrap=document.createElement('div'); wrap.className='matrix-wrap';
+  const t=document.createElement('table'); t.className='matrix-table';
+  let th=`<thead><tr><th></th>`;
+  q.cols.forEach(c=>{ th+=`<th>${c.replace('\n','<br>')}</th>`; });
+  t.innerHTML=th+`</tr></thead>`;
+  const tb=document.createElement('tbody');
+  q.rows.forEach((row,ri)=>{
+    const tr=document.createElement('tr');
+    let cells=`<td>${row}</td>`;
+    q.cols.forEach((_,ci)=>{
+      const sel=saved[ri]&&saved[ri].includes(ci);
+      cells+=`<td><div class="matrix-cell-btn${sel?' selected':''}"
+        onclick="toggleMatrix('${q.id}',${ri},${ci})">${sel?'✓':'□'}</div></td>`;
+    });
+    tr.innerHTML=cells; tb.appendChild(tr);
+  });
+  t.appendChild(tb); wrap.appendChild(t); a.appendChild(wrap);
+}
+
+function toggleMatrix(qId,ri,ci) {
+  if(!cAns[qId]) cAns[qId]={};
+  if(!cAns[qId][ri]) cAns[qId][ri]=[];
+  const arr=cAns[qId][ri], idx=arr.indexOf(ci);
+  if(idx>-1) arr.splice(idx,1); else arr.push(ci);
+  renderQ();
+}
+
+// Rank — potpuno slobodno, bez blokada
+function renderRank(q,a) {
+  const saved=cAns[q.id]||{};
+  const t=document.createElement('table'); t.className='rank-table';
+  t.innerHTML=`<thead><tr>
+    <th>Atribut</th>
+    <th>1<br><small>najvažnije</small></th>
+    <th>2</th><th>3</th>
+    <th>4<br><small>nebitno</small></th>
+  </tr></thead>`;
+  const tb=document.createElement('tbody');
+  q.options.forEach((opt,oi)=>{
+    const tr=document.createElement('tr');
+    let cells=`<td>${opt}</td>`;
+    for(let r=1;r<=4;r++){
+      const sel=saved[oi]===r;
+      cells+=`<td><button class="rank-btn${sel?' selected':''}"
+        onclick="selectRank('${q.id}',${oi},${r})">${r}</button></td>`;
+    }
+    tr.innerHTML=cells; tb.appendChild(tr);
+  });
+  t.appendChild(tb); a.appendChild(t);
+}
+
+function selectRank(qId,oi,r) {
+  if(!cAns[qId]) cAns[qId]={};
+  if(cAns[qId][oi]===r) delete cAns[qId][oi];
+  else cAns[qId][oi]=r;
+  renderQ();
+}
+
+// Free text
+function renderFree(q,a) {
+  const ta=document.createElement('textarea');
+  ta.className='free-input'; ta.rows=2;
+  ta.placeholder=q.placeholder||'';
+  ta.value=cAns[q.id]||'';
+  ta.oninput=()=>{ cAns[q.id]=ta.value.trim(); };
+  a.appendChild(ta);
+  setTimeout(()=>ta.focus(),80);
+}
+
+// Brands
+function renderBrands(q,a) {
+  const saved=cAns[q.id]||[];
+  const grid=document.createElement('div'); grid.className='brand-grid';
+  q.options.forEach((b,i)=>{
+    const sel=saved.includes(i);
+    const btn=document.createElement('div');
+    btn.className='brand-btn'+(sel?' selected':'');
+    btn.innerHTML=`<div class="b-check">${sel?'✓':''}</div><div class="b-name">${b}</div>`;
+    btn.onclick=()=>toggleBrand(q.id,i);
+    grid.appendChild(btn);
+  });
+  a.appendChild(grid);
+}
+
+function toggleBrand(qId,i) {
+  if(!cAns[qId]) cAns[qId]=[];
+  const idx=cAns[qId].indexOf(i);
+  if(idx>-1) cAns[qId].splice(idx,1); else cAns[qId].push(i);
+  renderQ();
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAV BUTTONS
+// ═══════════════════════════════════════════════════════
+function prevQ() { if(cIdx>0){cIdx--;renderQ();} }
+function nextQ() {
+  const q=SURVEYS[cSurvey].questions[cIdx];
+  if(q.type==='rank') {
+    const filled=Object.keys(cAns[q.id]||{}).length;
+    if(filled<q.options.length){ flash('Rangirajte sve atribute (1–4)'); return; }
+  }
+  const isLast=cIdx===SURVEYS[cSurvey].questions.length-1;
+  if(isLast) submit(); else { cIdx++; renderQ(); }
+}
+
+function flash(msg) {
+  let el=document.getElementById('flash-msg');
+  if(!el){
+    el=document.createElement('div'); el.id='flash-msg';
+    el.style.cssText=`position:fixed;bottom:85px;left:50%;transform:translateX(-50%);
+      background:#C62828;color:#fff;padding:9px 18px;border-radius:30px;
+      font-size:13px;font-weight:600;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);`;
+    document.body.appendChild(el);
+  }
+  el.textContent=msg; el.style.display='block';
+  clearTimeout(el._t); el._t=setTimeout(()=>el.style.display='none',2200);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SUBMIT — spremi lokalno + pošalji na Sheets
+// ═══════════════════════════════════════════════════════
+async function submit() {
+  const rec = {
+    id: Date.now(),
+    type: cSurvey,
+    timestamp: new Date().toISOString(),
+    answers: JSON.parse(JSON.stringify(cAns))
+  };
+
+  // Spremi lokalno odmah
+  const all=load(); all.push(rec); save(all);
+  updateHome();
+
+  // Pokažu overlay i pošalji na Sheets
+  document.getElementById('progress-bar').style.width='100%';
+  document.getElementById('sending-overlay').classList.add('show');
+
+  // Pripremi flat objekt za Sheets
+  const flat = flattenRecord(rec);
+  await sendToSheets(flat);
+
+  document.getElementById('sending-overlay').classList.remove('show');
+  showScreen('thanks'); cAns={};
+}
+
+// ═══════════════════════════════════════════════════════
+//  FLATTEN za Google Sheets
+// ═══════════════════════════════════════════════════════
+function flattenRecord(r) {
+  const sv = SURVEYS[r.type];
+  const dt = new Date(r.timestamp);
+  const q01 = r.answers['q01']||{};
+  const q02 = r.answers['q02']||{};
+  const q05 = r.answers['q05']||[];
+
+  const matVal = (ri,ci) => ((q01[ri]||[]).includes(ci)) ? '1' : '0';
+  const cols   = ['Svaki dan','Vise puta/dan','Nekoliko/sedm','Rijetko'];
+  const rows   = sv.id==='hand'
+    ? ['Nakon pranja ruku','Ujutro','Uvece','Suhoća/napetost']
+    : ['Nakon tuširanja','Ujutro','Uvece','Suhoća kože'];
+
+  const obj = {
+    ID: r.id,
+    Tip: r.type==='hand' ? 'Hand Care' : 'Body Care',
+    Datum: dt.toLocaleDateString('bs-BA'),
+    Vrijeme: dt.toLocaleTimeString('bs-BA'),
+  };
+
+  // Matrix — svaka kombinacija row×col
+  rows.forEach((row,ri)=>{
+    cols.forEach((col,ci)=>{
+      obj[`Q01_${row}_${col}`] = matVal(ri,ci);
+    });
+  });
+
+  // Ranking
+  RANK_ATTRS.forEach((attr,i)=>{
+    obj[`Q02_${attr.substring(0,20)}`] = q02[i]||'';
+  });
+
+  obj['Q03_Brend_koristim'] = r.answers['q03']||'';
+  obj['Q04_TopOfMind']      = r.answers['q04']||'';
+
+  BRANDS.forEach((b,i)=>{
+    obj[`Q05_${b}`] = q05.includes(i) ? 'Da' : 'Ne';
+  });
+
+  return obj;
+}
+
+// ═══════════════════════════════════════════════════════
+//  COUNTERS
+// ═══════════════════════════════════════════════════════
+function updateHome() {
+  const all=load();
+  const hand=all.filter(r=>r.type==='hand').length;
+  const body=all.filter(r=>r.type==='body').length;
+  document.getElementById('header-counter').textContent=all.length;
+  document.getElementById('count-hand').textContent=hand+' ispunjenih';
+  document.getElementById('count-body').textContent=body+' ispunjenih';
+}
+
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════
+function switchTab(t) {
+  dashTab=t;
+  document.getElementById('tab-hand').classList.toggle('active',t==='hand');
+  document.getElementById('tab-body').classList.toggle('active',t==='body');
+  renderDash(t);
+}
+
+function renderDash(type) {
+  const all=load();
+  const recs=all.filter(r=>r.type===type);
+  const today=new Date().toDateString();
+  document.getElementById('dash-total').textContent=all.length;
+  document.getElementById('dash-today').textContent=all.filter(r=>new Date(r.timestamp).toDateString()===today).length;
+  document.getElementById('dash-hand-n').textContent=all.filter(r=>r.type==='hand').length;
+  document.getElementById('dash-body-n').textContent=all.filter(r=>r.type==='body').length;
+
+  const url=getURL();
+  document.getElementById('sync-info').textContent = url
+    ? '✓ Podaci se šalju u Google Sheets' : '⚠ Veza nije postavljena — podaci su samo lokalno';
+
+  const sv=SURVEYS[type];
+  const cont=document.getElementById('dash-content');
+  cont.innerHTML='';
+  if(!recs.length){ cont.innerHTML='<p style="text-align:center;color:#888;padding:20px">Nema podataka.</p>'; return; }
+
+  sv.questions.forEach(q=>{
+    const block=document.createElement('div'); block.className='q-dash-block';
+    const lbl=document.createElement('div'); lbl.className='q-dash-label';
+    lbl.textContent=q.id.toUpperCase()+' — '+q.text; block.appendChild(lbl);
+
+    if(q.type==='matrix'){
+      const colLabels=['Svaki dan','Više puta/dan','Nekoliko/sedm.','Rijetko'];
+      const mdiv=document.createElement('div'); mdiv.className='matrix-dash';
+      q.rows.forEach((row,ri)=>{
+        const mrow=document.createElement('div'); mrow.className='mrow';
+        const ml=document.createElement('div'); ml.className='mrow-label'; ml.textContent=row;
+        mrow.appendChild(ml);
+        const mb=document.createElement('div'); mb.className='mrow-bars';
+        q.cols.forEach((_,ci)=>{
+          const cnt=recs.filter(r=>(r.answers[q.id]||{})[ri]&&r.answers[q.id][ri].includes(ci)).length;
+          const pct=recs.length?Math.round((cnt/recs.length)*100):0;
+          const bw=document.createElement('div'); bw.className='mrow-bar-wrap';
+          bw.innerHTML=`<div class="mrow-col-label">${colLabels[ci]}</div>
+            <div class="mrow-track"><div class="mrow-fill" style="width:${pct}%"></div></div>
+            <div class="mrow-cnt">${cnt}</div>`;
+          mb.appendChild(bw);
+        });
+        mrow.appendChild(mb); mdiv.appendChild(mrow);
+      });
+      block.appendChild(mdiv);
+    }
+    else if(q.type==='rank'){
+      const scores={};
+      q.options.forEach((_,i)=>scores[i]=0);
+      recs.forEach(r=>{ const ans=r.answers[q.id]||{};
+        for(const k in ans){ scores[k]=(scores[k]||0)+(5-ans[k]); } });
+      const tbl=document.createElement('table'); tbl.className='rank-sum-table';
+      tbl.innerHTML=`<thead><tr><th>Atribut</th><th>Score</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th></tr></thead>`;
+      const tb=document.createElement('tbody');
+      Object.entries(scores).sort((a,b)=>b[1]-a[1]).forEach(([i,sc])=>{
+        const rc=[1,2,3,4].map(r=>recs.filter(rec=>(rec.answers[q.id]||{})[i]===r).length);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${q.options[i]}</td><td class="rank-score">${sc}</td>${rc.map(c=>`<td>${c}</td>`).join('')}`;
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb); block.appendChild(tbl);
+    }
+    else if(q.type==='free'){
+      const ans=recs.map(r=>r.answers[q.id]).filter(a=>a&&a.trim());
+      if(!ans.length){ block.innerHTML+=`<em style="font-size:11px;color:#aaa">Nema odgovora</em>`; }
+      else {
+        const freq={};
+        ans.forEach(a=>{ const k=a.toLowerCase().trim(); freq[k]=(freq[k]||0)+1; });
+        const ul=document.createElement('ul'); ul.className='free-list';
+        Object.entries(freq).sort((a,b)=>b[1]-a[1]).forEach(([br,cnt])=>{
+          const li=document.createElement('li');
+          li.innerHTML=`<span>${br}</span><span style="margin-left:auto;font-weight:700;color:var(--bm)">${cnt}x</span>`;
+          ul.appendChild(li);
+        });
+        block.appendChild(ul);
+      }
+    }
+    else if(q.type==='brands'){
+      const max=Math.max(recs.length,1);
+      q.options.forEach((br,bi)=>{
+        const cnt=recs.filter(r=>(r.answers[q.id]||[]).includes(bi)).length;
+        const pct=Math.round((cnt/recs.length)*100);
+        const row=document.createElement('div'); row.className='bar-row';
+        row.innerHTML=`<div class="bar-label">${br}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(cnt/max)*100}%"></div></div>
+          <div class="bar-count">${cnt}<br><small style="color:#888">${pct}%</small></div>`;
+        block.appendChild(row);
+      });
+    }
+    cont.appendChild(block);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CSV EXPORT (lokalni backup)
+// ═══════════════════════════════════════════════════════
+function exportCSV() {
+  const all=load();
+  if(!all.length){ alert('Nema podataka za eksport.'); return; }
+  const rows=[['ID','Tip','Datum','Vrijeme',
+    'Q01_NakonPranja','Q01_Ujutro','Q01_Uvece','Q01_Suhoća',
+    'Q02_Hidratacija','Q02_Apsorpcija','Q02_Miris','Q02_DermTest',
+    'Q03_Brend_koristim','Q04_TopOfMind',
+    'Q05_Neutrogena','Q05_Mixa','Q05_Nivea','Q05_Balea']];
+  all.forEach(r=>{
+    const dt=new Date(r.timestamp);
+    const q01=r.answers['q01']||{};
+    const q02=r.answers['q02']||{};
+    const q05=r.answers['q05']||[];
+    const matVal=(ri,ci)=>((q01[ri]||[]).includes(ci))?'1':'0';
+    rows.push([
+      r.id, r.type==='hand'?'Hand Care':'Body Care',
+      dt.toLocaleDateString('bs-BA'), dt.toLocaleTimeString('bs-BA'),
+      matVal(0,0),matVal(1,0),matVal(2,0),matVal(3,0),
+      q02[0]||'', q02[1]||'', q02[2]||'', q02[3]||'',
+      r.answers['q03']||'', r.answers['q04']||'',
+      q05.includes(0)?'Da':'Ne', q05.includes(1)?'Da':'Ne',
+      q05.includes(2)?'Da':'Ne', q05.includes(3)?'Da':'Ne',
+    ]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`Neutrogena_Survey_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function clearData() {
+  if(!confirm('Obrisati lokalne podatke? (Google Sheets ostaje nepromijenjen)')) return;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  renderDash(dashTab); updateHome();
+}
+
+updateHome();
+</script>
+</body>
+</html>
